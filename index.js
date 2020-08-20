@@ -1,10 +1,15 @@
-var keymute = '/мут',
-	keyunmute = '/анмут';
+var keymute = 'мут',
+	keyunmute = 'анмут',
+	kubik = "кубик",
+	help = "хелп",
+	give_warn = "варн",
+	unwarn = "разварн",
+	kick = "кик";
 const {
 	VK
 } = require('vk-io');
 const vk = new VK({
-	token: " token " //токен от группы
+	token: " token "
 });
 const {
 	api
@@ -21,7 +26,6 @@ setInterval(saveConfig, 20 * 60000);
 readConfig();
 vk.updates.start();
 vk.updates.on('message', (context, next) => {
-	console.log(config);
 	if (!config.hasOwnProperty(context.chatId)) {
 		config[context.chatId] = { "admins": [239801026], "whitelist": [], "warn": {}, "mute": {}, "audioBlocked": false };
 		saveConfig();
@@ -34,12 +38,11 @@ vk.updates.on('message', (context, next) => {
 		saveConfig();
 		checkWarn(context.senderId, context);
 	} else if (!context.isUser || context.text == null) return
-	else if (context.text.toLowerCase() == 'кубик') {
+	else if (context.text.toLowerCase() == kubik) {
 		let scope = (getRandomInt(6));
-		context.send(cubes[scope]);
-		context.send(`Выпало число ${scope+1}!`)
-	} else if (context.text.toLowerCase() == '/help') {
-		context.send('Команды бота:\n/кик - исключает пользователя\n/мут 1 - дает мут пользователю на любое время (вместо 1 можно писать любое число, указывается в минутах)\n/w - дает варн пользователю\n/unw - снимает все варны пользователя\nУказанные выше команды работают только при ответе на сообщение пользователя, с которым нужно совершить какое либо действие.\nДоп. команды:\nКубик - рандом значение от 1 до 6');
+		context.send(`${cubes[scope]}\n[id${context.senderId}|Вам] выпало число ${scope+1}!`)
+	} else if (context.text.toLowerCase() == help) {
+		context.send('Команды бота:\nКик - исключает пользователя\nМут 1 - дает мут пользователю на любое время (вместо 1 можно писать любое число, указывается в минутах)\nВарн - дает варн пользователю\nРазварн - снимает все варны пользователя\nУказанные выше команды работают только при ответе на сообщение пользователя, с которым нужно совершить какое либо действие.\nДоп. команды:\nКубик - рандом значение от 1 до 6');
 	} else if (context.hasReplyMessage == false) return
 	else if (context.replyMessage.senderId < 0 || config[context.chatId]["admins"].includes(context.replyMessage.senderId)) return
 	else if (context.text.startsWith(keymute)) {
@@ -58,7 +61,7 @@ vk.updates.on('message', (context, next) => {
 		} else {
 			checkAdmin(context);
 		}
-	} else if (context.text.toLowerCase() == "/w") {
+	} else if (context.text.toLowerCase() == give_warn) {
 		if (config[context.chatId]["admins"].includes(context.senderId)) {
 			if (!config[context.chatId]["warn"].hasOwnProperty(context.replyMessage.senderId)) {
 				config[context.chatId]["warn"][context.replyMessage.senderId] = 1;
@@ -72,7 +75,7 @@ vk.updates.on('message', (context, next) => {
 		} else {
 			checkAdmin(context);
 		}
-	} else if (context.text.toLowerCase() == "/unw") {
+	} else if (context.text.toLowerCase() == unwarn) {
 		if (config[context.chatId]["admins"].includes(context.senderId)) {
 			if (!config[context.chatId]["warn"].hasOwnProperty(context.replyMessage.senderId)) {
 				config[context.chatId]["warn"][context.replyMessage.senderId] = 0;
@@ -86,7 +89,7 @@ vk.updates.on('message', (context, next) => {
 		} else {
 			checkAdmin(context);
 		}
-	} else if (context.text.toLowerCase() == "/кик") {
+	} else if (context.text.toLowerCase() == kick) {
 		if (config[context.chatId]["admins"].includes(context.senderId)) {
 			context.kickUser(context.replyMessage.senderId);
 			config[context.chatId]["warn"][context.replyMessage.senderId] = 0;
@@ -136,6 +139,10 @@ function checkMute() {
 	})
 }
 
+function timer(ms) {
+	return new Promise(res => setTimeout(res, ms));
+}
+
 function sendmsg(chat, msg) {
 	api.messages.send({
 		chat_id: chat,
@@ -179,4 +186,4 @@ function saveConfig() {
 function getRandomInt(max) {
 	return Math.floor(Math.random() * Math.floor(max));
 }
-var cubes = ["⬜⬜⬜\n⬜🔳⬜\n⬜⬜⬜","🔳⬜⬜\n⬜⬜⬜\n⬜⬜🔳","🔳⬜⬜\n⬜🔳⬜\n⬜⬜🔳","🔳⬜🔳\n⬜⬜⬜\n🔳⬜🔳","🔳⬜🔳\n⬜🔳⬜\n🔳⬜🔳","🔳⬜🔳\n🔳⬜🔳\n🔳⬜🔳"]
+var cubes = ["ᅠ ᅠ ⬜⬜⬜\nᅠ ᅠ ⬜🔳⬜\nᅠ ᅠ ⬜⬜⬜", "ᅠ ᅠ 🔳⬜⬜\nᅠ ᅠ ⬜⬜⬜\nᅠ ᅠ ⬜⬜🔳", "ᅠ ᅠ 🔳⬜⬜\nᅠ ᅠ ⬜🔳⬜\nᅠ ᅠ ⬜⬜🔳", "ᅠ ᅠ 🔳⬜🔳\nᅠ ᅠ ⬜⬜⬜\nᅠ ᅠ 🔳⬜🔳", "ᅠ ᅠ 🔳⬜🔳\nᅠ ᅠ ⬜🔳⬜\nᅠ ᅠ 🔳⬜🔳", "ᅠ ᅠ 🔳⬜🔳\nᅠ ᅠ 🔳⬜🔳\nᅠ ᅠ 🔳⬜🔳"]
