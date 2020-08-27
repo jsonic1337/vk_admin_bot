@@ -4,12 +4,14 @@ var keymute = 'мут',
 	help = "хелп",
 	give_warn = "варн",
 	unwarn = "разварн",
-	kick = "кик";
+	kick = "кик",
+	random_anime = "аниме";
+const request = require('request');
 const {
 	VK
 } = require('vk-io');
 const vk = new VK({
-	token: " token "
+	token: " токен "
 });
 const {
 	api
@@ -42,7 +44,18 @@ vk.updates.on('message', (context, next) => {
 		let scope = (getRandomInt(6));
 		context.send(`${cubes[scope]}\n[id${context.senderId}|Вам] выпало число ${scope+1}!`)
 	} else if (context.text.toLowerCase() == help) {
-		context.send('Команды бота:\nКик - исключает пользователя\nМут 1 - дает мут пользователю на любое время (вместо 1 можно писать любое число, указывается в минутах)\nВарн - дает варн пользователю\nРазварн - снимает все варны пользователя\nУказанные выше команды работают только при ответе на сообщение пользователя, с которым нужно совершить какое либо действие.\nДоп. команды:\nКубик - рандом значение от 1 до 6');
+		context.send('Команды бота:\nКик - исключает пользователя\nМут 1 - дает мут пользователю на любое время (вместо 1 можно писать любое число, указывается в минутах)\nВарн - дает варн пользователю\nРазварн - снимает все варны пользователя\nУказанные выше команды работают только при ответе на сообщение пользователя, с которым нужно совершить какое либо действие.\nДоп. команды:\nКубик - рандом значение от 1 до 6\nАниме - название рандомного аниме');
+	} else if (context.text.toLowerCase() == random_anime) {
+		request.post({
+			url: 'https://genword.ru/generators/anime/new/',
+			headers: {
+				'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+				'x-requested-with': 'XMLHttpRequest'
+			}
+		}, (err, response, body) => {
+			if (err) return console.log(err);
+			context.send(JSON.parse(body).result.nameRu);
+		});
 	} else if (context.hasReplyMessage == false) return
 	else if (context.replyMessage.senderId < 0 || config[context.chatId]["admins"].includes(context.replyMessage.senderId)) return
 	else if (context.text.startsWith(keymute)) {
@@ -137,10 +150,6 @@ function checkMute() {
 			}
 		})
 	})
-}
-
-function timer(ms) {
-	return new Promise(res => setTimeout(res, ms));
 }
 
 function sendmsg(chat, msg) {
